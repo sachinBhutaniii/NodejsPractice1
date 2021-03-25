@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
+const blogRoutes = require("./routes/blogRoutes");
 
 const morgan = require("morgan"); //3rd party middleware
 
@@ -9,6 +10,8 @@ const dbURI =
   "mongodb+srv://First-user:firstuser1234@cluster0.r2y3r.mongodb.net/net-ninja-nodejs?retryWrites=true&w=majority";
 
 //mongoose.connect(dbURI); //gives a warning
+//if collection does not exists it will be created
+
 mongoose
   .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(result => {
@@ -27,7 +30,12 @@ app.set("view engine", "ejs");
 
 //app.set("views", "myfolderforviews");
 
+app.use(express.urlencoded({ extended: true })); //takes url encoded data and passes into an object that we can use on req object
+
 app.use(morgan("tiny")); //takes a parameter which states how its gonna be formatted
+
+//blog routes
+app.use("/blogs", blogRoutes);
 
 //MIDDLEWARE
 // it will be called for every request from top to bottom all middlewares are called until a response is sent
@@ -49,17 +57,76 @@ app.use((req, res, next) => {
 });
 */
 
+//mongoose and mongo routes
+
+/*
+
+app.get("/add-blog", (req, res) => {
+  const blog = new Blog({
+    title: "Db blog 2 ",
+    snippet: "About my new blog",
+    body: "more about my blog",
+  });
+
+  //inserting into DB
+  blog
+    .save()
+    .then(result => {
+      res.send(result); //JSON response
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
+
+//to retrieve all the blogs
+app.get("/all-blogs", (req, res) => {
+  //we do not need to create another instance we can access it directly on Blog (model)
+
+  Blog.find()
+    .then(result => {
+      res.send(result);
+      // res.write(result);
+      // res.end();
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
+
+//find a single blog
+app.get("/single-blog", (req, res) => {
+  //id in mongo is not stored as a string
+  //but when we use it in mongoose it is handled as a string
+
+  Blog.findById("605ad42533407e3fbe77affa")
+    .then(result => {
+      res.send(result);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
+
+//find by id (try)
+app.get("/byid/:id", (req, res) => {
+  Blog.findById(req.params.id)
+    .then(result => {
+      res.send(result);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
+
+
+*/
+
 app.get("/", (req, res) => {
   //we dont send file here , we now render a view
   //   res.render("index");
 
-  const blogs = [
-    { title: "PSG", snippet: "Neymar 123456789" },
-    { title: "Barca", snippet: "Messi 123456789" },
-    { title: "Athletico", snippet: "Suarez 123456789" },
-  ];
-  //passing some dynamic value
-  res.render("index", { title: "Home", blogs });
+  res.redirect("/blogs");
 });
 
 //this middleware will not be called for / request becasue we are sending response before it
@@ -71,10 +138,6 @@ app.use((req, res, next) => {
 app.get("/about", (req, res) => {
   //we dont send file here , we now render a view
   res.render("about", { title: "About" });
-});
-
-app.get("/blogs/create", (req, res) => {
-  res.render("create", { title: "Create a new blog" });
 });
 
 app.use((req, res) => {

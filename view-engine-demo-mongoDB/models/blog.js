@@ -29,3 +29,5 @@ const blogSchema = new Schema(
 // whereever we use blog DB will convert it to Blogs
 // based on this name it will automatically look for the blogs collection
 const Blog = mongoose.model("Blog", blogSchema);
+
+module.exports = Blog;
