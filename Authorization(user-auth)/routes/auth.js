@@ -4,13 +4,18 @@ const router = require("express").Router();
 const User = require("../model/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const verify = require("./verifyToken");
 
 //express validator
 const { check, validationResult } = require("express-validator");
 
 // if person logged in is a user
-router.get("/", (req, res) => {
-  res.send("Welcome to User Dashboard");
+router.get("/", verify, async (req, res) => {
+  const loggedin_user = await User.findOne({ _id: req.user._id });
+  console.log(loggedin_user.role);
+
+  if (loggedin_user.role === 0) res.send("Welcome to User Dashboard");
+  else res.status(400).send("Access Denied , Please login as a USER");
 });
 
 router.post(

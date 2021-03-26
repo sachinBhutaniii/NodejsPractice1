@@ -10,7 +10,8 @@ router.get("/", verify, async (req, res) => {
   console.log(loggedin_user.role);
 
   if (loggedin_user.role === 1) res.redirect("/api/admin");
-  else res.redirect("/api/user");
+  else if (loggedin_user.role === 0) res.redirect("/api/user");
+  else res.status(400).send("Bad Request");
 });
 
 module.exports = router;
